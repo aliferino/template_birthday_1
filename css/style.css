@@ -1,0 +1,1543 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   TEMPLATE ULANG TAHUN , latar pink lily
+   ═══════════════════════════════════════════════════════════════════════════
+
+   Catatan penting soal animasi:
+   Elemen yang dianimasikan disembunyikan HANYA bila <html> punya class "js"
+   (ditambahkan oleh skrip kecil di <head>). Jadi kalau JavaScript mati atau
+   gagal dimuat, seluruh teks tetap terlihat , halaman tidak pernah kosong.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Palet pink lily ── */
+  --pink-50:  #fff7fa;
+  --pink-100: #ffeef4;
+  --pink-200: #fbd9e5;
+  --pink-300: #f7bcd0;
+  --pink-400: #f095b6;
+  --pink-500: #e8739c;
+  --pink-600: #d1547f;
+  --pink-700: #a83c62;
+  --pink-800: #7d2a49;
+
+  --putih:    #ffffff;
+  --krem:     #fffafc;
+
+  --tinta:      #4a2b3a;
+  --tinta-soft: #7d5568;
+  --tinta-muda: #a8839a;
+
+  --emas:     #d9a54a;
+
+  /* ── Ukuran ── */
+  --radius:   20px;
+  --radius-k: 14px;
+  --lebar:    1080px;
+  --bayang:   0 14px 40px rgba(168, 60, 98, 0.14);
+  --bayang-k: 0 6px 18px rgba(168, 60, 98, 0.10);
+
+  /* ── Font ── */
+  --font-judul: "Great Vibes", "Segoe Script", "Brush Script MT", cursive;
+  --font-teks:  "Nunito", "Segoe UI", system-ui, -apple-system, sans-serif;
+
+  --transisi: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Dasar ────────────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  /* Jaring pengaman: animasi yang menggeser elemen ke samping tidak boleh
+     membuat halaman bisa digulir mendatar. */
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-teks);
+  font-size: 17px;
+  line-height: 1.75;
+  color: var(--tinta);
+
+  /* Gradasi pink lily: pucat di atas, makin pink di bawah */
+  background:
+    linear-gradient(180deg,
+      var(--pink-50) 0%,
+      var(--pink-100) 26%,
+      var(--pink-200) 62%,
+      #f8c6d8 100%);
+  background-attachment: fixed;
+
+  overflow-x: hidden;
+}
+
+img { max-width: 100%; height: auto; display: block; }
+
+/* ══ Lapisan latar ══════════════════════════════════════════════════════════ */
+.latar {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Pola bunga lily yang diulang (aset: assets/pattern-lily.svg) */
+.latar-pola {
+  position: absolute;
+  inset: -10%;
+  background-image: url("../assets/pattern-lily.svg");
+  background-repeat: repeat;
+  background-size: 260px 260px;
+  opacity: 0.55;
+  /* pudar ke bawah supaya bagian bawah tidak terlalu ramai */
+  -webkit-mask-image: linear-gradient(180deg,
+    rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.5) 55%, rgba(0,0,0,0.25) 100%);
+  mask-image: linear-gradient(180deg,
+    rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.5) 55%, rgba(0,0,0,0.25) 100%);
+}
+
+/* Cahaya lembut dari atas */
+.latar-cahaya {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(900px 520px at 50% -8%, rgba(255,255,255,0.85), transparent 70%),
+    radial-gradient(700px 480px at 12% 88%, rgba(240,149,182,0.24), transparent 72%),
+    radial-gradient(700px 480px at 88% 74%, rgba(247,188,208,0.26), transparent 72%);
+}
+
+/* Kanvas kelopak jatuh */
+.latar-kelopak {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ══ Bunga di sisi halaman (parallax) ══════════════════════════════════════
+   Bunga lily & matahari sebagai hiasan di tepi kiri-kanan halaman.
+   Dibuat agak transparan supaya tidak bersaing dengan isi halaman,
+   tapi tetap jelas terlihat sebagai bingkai. */
+.bunga-pinggir {
+  position: fixed;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.85;
+  filter: drop-shadow(0 10px 22px rgba(168, 60, 98, 0.22));
+}
+
+.bunga-pinggir img { width: 100%; height: auto; }
+
+/* Bunga besar di tepi atas, kecil di tengah-bawah supaya tidak menutupi teks */
+.kiri-1  { top: 12vh;  left: -18px;  width: 132px; }
+.kanan-1 { top: 52vh;  right: -20px; width: 140px; }
+.kiri-2  { top: 74vh;  left: -10px;  width: 96px;  opacity: 0.6; }
+.kanan-2 { top: 20vh;  right: -12px; width: 92px;  opacity: 0.6; }
+.kiri-3  { top: 46vh;  left: -22px;  width: 118px; opacity: 0.7; }
+.kanan-3 { top: 82vh;  right: -16px; width: 108px; opacity: 0.7; }
+
+/* Bunga matahari sedikit diputar supaya terlihat alami, bukan berdiri tegak */
+.kanan-1 img { transform: rotate(-8deg); }
+.kiri-2 img  { transform: rotate(10deg); }
+.kanan-3 img { transform: rotate(7deg); }
+
+/* ══ Confetti ══════════════════════════════════════════════════════════════ */
+.confetti {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+}
+
+/* ══ Tombol musik ══════════════════════════════════════════════════════════ */
+.tombol-musik {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 70;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 10px 16px;
+  border: 1.5px solid var(--pink-300);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--pink-700);
+  cursor: pointer;
+  box-shadow: var(--bayang-k);
+  transition: var(--transisi);
+}
+
+.tombol-musik:hover {
+  background: var(--putih);
+  border-color: var(--pink-400);
+  transform: translateY(-2px);
+  box-shadow: var(--bayang);
+}
+
+.tombol-musik.aktif {
+  background: var(--pink-500);
+  border-color: var(--pink-600);
+  color: var(--putih);
+}
+
+.tombol-musik.aktif #musik-ikon {
+  animation: denyut-musik 1.4s ease-in-out infinite;
+}
+
+/* Lagu sedang berjalan tapi dibisukan: tetap ditandai, hanya tanpa denyut,
+   supaya beda dengan keadaan benar-benar mati. */
+.tombol-musik.bisu {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: var(--pink-300);
+  color: var(--pink-700);
+}
+
+.tombol-musik.bisu #musik-ikon { animation: none; opacity: 0.75; }
+
+.tombol-musik[disabled] { opacity: 0.6; cursor: not-allowed; }
+
+/* Lagu sudah berjalan tapi suaranya belum boleh berbunyi (browser menunggu
+   sentuhan pertama). Tombolnya diberi denyut halus supaya pengguna tahu
+   perlu menyentuh halaman sekali. */
+.tombol-musik.denyut-perhatian {
+  animation: tarik-perhatian 2.2s ease-in-out infinite;
+}
+
+@keyframes tarik-perhatian {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(232, 115, 156, 0.45); }
+  50%      { box-shadow: 0 0 0 9px rgba(232, 115, 156, 0); }
+}
+
+@keyframes denyut-musik {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.22); }
+}
+
+/* ══ HERO ══════════════════════════════════════════════════════════════════ */
+.hero {
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  min-height: 100svh;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  padding: clamp(64px, 9vh, 96px) 24px clamp(48px, 7vh, 84px);
+  text-align: center;
+}
+
+.hero-cahaya {
+  position: absolute;
+  width: min(680px, 92vw);
+  height: min(680px, 92vw);
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(255,255,255,0.92) 0%,
+    rgba(251,217,229,0.6) 42%,
+    transparent 68%);
+  filter: blur(6px);
+  z-index: -1;
+}
+
+/* Chibi Maruko di bagian landing (hero).
+   Tingginya dibatasi dengan vh supaya seluruh isi hero (chibi + nama +
+   tanggal + kue) tetap muat dalam satu layar tanpa perlu digulir. */
+.hero-bunga-atas {
+  width: clamp(120px, 19vw, 190px);
+  max-height: 26vh;
+  margin-bottom: 0;
+  filter: drop-shadow(0 16px 30px rgba(168, 60, 98, 0.26));
+}
+
+.hero-bunga-atas img {
+  width: 100%;
+  height: 100%;
+  max-height: 26vh;
+  object-fit: contain;
+  transform-origin: 50% 100%;
+}
+
+.hero-kecil {
+  margin: 0;
+  font-size: clamp(13px, 1.6vw, 15px);
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--pink-600);
+}
+
+.hero-nama {
+  margin: 2px 0 0;
+  font-family: var(--font-judul);
+  font-size: clamp(38px, 8.5vw, 84px);
+  font-weight: 400;
+
+  /* Huruf sambung (Great Vibes) punya ekor atas & bawah yang tinggi,
+     sedangkan teksnya diwarnai dengan background-clip. Bila line-height
+     terlalu rapat, bagian atas/bawah huruf terpotong. Karena itu:
+       - line-height dilonggarkan
+       - padding diberi ruang untuk ekor huruf
+       - display inline-block + overflow visible supaya tidak dipotong */
+  line-height: 1.3;
+  padding: 0.12em 0.1em 0.2em;
+  display: inline-block;
+  overflow: visible;
+
+  background: linear-gradient(135deg,
+    var(--pink-700) 0%, var(--pink-500) 42%, var(--pink-400) 70%, var(--pink-600) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: var(--pink-600);
+
+  filter: drop-shadow(0 3px 10px rgba(168, 60, 98, 0.2));
+}
+
+.hero-judul {
+  margin: 0;
+  font-size: clamp(17px, 2.4vw, 23px);
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: var(--tinta);
+}
+
+.hero-sub {
+  margin: 2px 0 0;
+  font-size: clamp(14px, 2vw, 17px);
+  color: var(--tinta-soft);
+}
+
+.hero-tanggal-baris {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: clamp(6px, 1.4vh, 12px);
+}
+
+.hero-tanggal,
+.hero-umur {
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1.5px solid var(--pink-200);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--pink-700);
+  letter-spacing: 0.04em;
+}
+
+.hero-umur:empty { display: none; }
+
+.hero-kue {
+  width: clamp(84px, 12vw, 118px);
+  margin-top: clamp(6px, 1.5vh, 16px);
+  filter: drop-shadow(0 12px 24px rgba(168, 60, 98, 0.2));
+}
+
+/* Petunjuk gulir */
+.gulir-petunjuk {
+  position: absolute;
+  bottom: clamp(6px, 1.5vh, 26px);
+  left: 50%;
+  transform: translateX(-50%);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--pink-600);
+  transition: opacity 0.45s ease;
+}
+
+.gulir-petunjuk.sembunyi { opacity: 0; }
+
+.gulir-panah {
+  font-size: 18px;
+  animation: turun 1.7s ease-in-out infinite;
+}
+
+@keyframes turun {
+  0%, 100% { transform: translateY(0);   opacity: 1; }
+  50%      { transform: translateY(7px); opacity: 0.5; }
+}
+
+/* ══ Bagian umum ═══════════════════════════════════════════════════════════ */
+main {
+  position: relative;
+  z-index: 2;
+}
+
+.bagian {
+  max-width: var(--lebar);
+  margin: 0 auto;
+  padding: 92px 24px;
+}
+
+.bagian-ucapan { padding-bottom: 60px; }
+
+.bagian-judul {
+  margin: 0 0 6px;
+  font-family: var(--font-judul);
+  font-size: clamp(34px, 6vw, 54px);
+  font-weight: 400;
+  text-align: center;
+  color: var(--pink-700);
+  line-height: 1.2;
+}
+
+.bagian-kecil {
+  margin: 0 0 46px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--tinta-soft);
+}
+
+/* ══ Ucapan & Doa: TIMELINE VERTIKAL ══════════════════════════════════════
+   Tataletaknya seperti garis waktu:
+     - satu garis tegak di sisi kiri sebagai tulang belakang
+     - bulatan bernomor menempel di garis itu (titik tiap langkah)
+     - kartu ucapannya di sebelah kanan bulatan
+   Jadi terlihat mengalir dari atas ke bawah, bukan sekadar kumpulan kartu. */
+.daftar-ucapan {
+  position: relative;
+  max-width: 660px;
+  margin: 0 auto;
+  padding-left: 78px;      /* ruang untuk garis + bulatan nomor */
+}
+
+/* garis tegak (tulang belakang timeline) */
+.daftar-ucapan::before {
+  content: "";
+  position: absolute;
+  left: 23px;              /* tepat di tengah bulatan nomor */
+  top: 12px;
+  bottom: 12px;
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(180deg,
+    rgba(240, 149, 182, 0) 0%,
+    rgba(240, 149, 182, 0.75) 6%,
+    rgba(240, 149, 182, 0.75) 94%,
+    rgba(240, 149, 182, 0) 100%);
+}
+
+.ucapan {
+  position: relative;
+  padding: 26px 26px 24px;
+  margin-bottom: 22px;
+
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  border: 1.5px solid rgba(247, 188, 208, 0.85);
+  border-radius: var(--radius);
+  box-shadow: var(--bayang-k);
+
+  /* SENGAJA tanpa overflow:hidden , bulatan nomor timeline berada di LUAR
+     kotak kartu, jadi akan terpotong bila overflow disembunyikan. */
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s ease;
+}
+
+/* kartu terakhir tidak perlu jarak bawah */
+.ucapan:last-child { margin-bottom: 0; }
+
+/* Hiasan sudut kanan atas: cahaya pink lembut.
+   Dulu berupa pola bunga yang menjorok keluar kotak (butuh overflow:hidden),
+   sekarang diganti cahaya yang seluruhnya DI DALAM kotak supaya bulatan
+   nomor timeline bisa tampil di luar kartu. */
+.ucapan::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(130px 130px at 100% 0%,
+    rgba(247, 188, 208, 0.5), rgba(247, 188, 208, 0) 72%);
+  pointer-events: none;
+}
+
+/* Batang penghubung dari bulatan nomor ke kartu */
+.ucapan::after {
+  content: "";
+  position: absolute;
+  left: -34px;             /* dari tepi kartu ke arah bulatan */
+  top: 40px;
+  width: 34px;
+  height: 2px;
+  background: rgba(240, 149, 182, 0.55);
+  border-radius: 2px;
+}
+
+.ucapan:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--bayang);
+}
+
+/* Bulatan nomor pada timeline.
+   Ditaruh MENEMPEL di garis tegak (.daftar-ucapan::before), jadi berfungsi
+   sebagai titik langkah. Latarnya pekat supaya garis di belakangnya tidak
+   menembus angka.
+   Sebelumnya memakai emoji, tapi emoji terlihat "khas AI" dan tampilannya
+   berbeda-beda di tiap perangkat. Nomor memberi kesan tertata dan bersih. */
+.ucapan-ikon {
+  position: absolute;
+  /* Dipusatkan tepat di atas garis timeline. Angkanya memperhitungkan
+     padding wadah (78px) + lebar border kartu (1.5px) + setengah lebar
+     bulatan (20px). */
+  left: -75.5px;
+  top: 20px;
+
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--pink-300);
+  box-shadow: 0 4px 12px rgba(168, 60, 98, 0.16);
+
+  font-family: var(--font-teks);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--pink-600);
+  line-height: 1;
+  z-index: 1;
+}
+
+.ucapan-judul {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--pink-700);
+}
+
+.ucapan-isi {
+  margin: 0;
+  font-size: 15.5px;
+  line-height: 1.8;
+  color: var(--tinta-soft);
+}
+
+/* ══ Kalender ══════════════════════════════════════════════════════════════
+   Gaya kertas prangko: tepi bergelombang MASUK ke dalam (bukan menonjol
+   keluar). Caranya memakai mask berlapis empat , satu lapisan memotong
+   setengah lingkaran di tiap sisi, lalu digabung dengan "intersect"
+   sehingga hanya bagian yang lolos keempat lapisan yang terlihat.
+   ══════════════════════════════════════════════════════════════════════════ */
+.bagian-kalender {
+  display: flex;
+  justify-content: center;
+  padding-top: 46px;
+  padding-bottom: 46px;
+}
+
+/* Baris: buket di kiri (sebagian di BELAKANG kalender), kalender di kanan */
+.kalender-baris {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  width: 100%;
+  max-width: 980px;
+}
+
+/* Buket lily. Gambar aslinya PNG transparan, jadi tidak ada kotak putih
+   yang mengganggu di atas latar pink.
+
+   Dibuat seolah "muncul dari belakang kalender":
+     - z-index lebih rendah daripada kalender
+     - margin kanan negatif, jadi tepi kanan buket terselip di balik kertas
+     - gambar di dalamnya diputar sedikit supaya tidak berdiri tegak kaku */
+.kalender-buket {
+  position: relative;
+  z-index: 1;
+  flex: 0 1 auto;
+  display: block;
+  width: clamp(180px, 32vw, 400px);
+  margin-right: clamp(-90px, -9vw, -30px);
+  pointer-events: none;
+  filter: drop-shadow(0 18px 30px rgba(168, 60, 98, 0.24));
+}
+
+/* Putaran ditaruh di <img>, bukan di <picture>, karena GSAP menganimasikan
+   elemen <picture>-nya , dengan begini keduanya tidak saling menimpa.
+   Nilai negatif = miring ke KIRI ATAS, seperti tangkai yang tumbuh
+   condong ke dalam halaman. Titik putarnya di kanan-bawah (70% 95%)
+   supaya pangkal buket tetap menempel di tepi kalender. */
+.kalender-buket img {
+  width: 100%;
+  height: auto;
+  transform: rotate(-8deg);
+  transform-origin: 70% 95%;
+}
+
+.kalender-bungkus {
+  position: relative;
+  z-index: 2;
+  flex: 0 1 auto;
+  width: min(510px, 100%);
+}
+
+/* Pembungkus khusus untuk bayangan.
+   Bayangan ditaruh di sini (bukan di kertasnya) karena elemen yang memakai
+   mask akan memotong bayangannya sendiri , dengan pembungkus + drop-shadow,
+   bayangan mengikuti bentuk gelombang kertasnya. */
+.kalender-bayang {
+  filter: drop-shadow(0 16px 30px rgba(168, 60, 98, 0.26))
+          drop-shadow(0 3px 8px rgba(168, 60, 98, 0.14));
+}
+
+.kalender-kertas {
+  --gelombang: 9px;      /* jari-jari lekukan */
+  --jarak: 18px;         /* jarak antar lekukan = 2 × gelombang */
+
+  position: relative;
+  padding: 32px 26px 28px;
+  border-radius: 2px;
+
+  background: linear-gradient(158deg,
+    #fffaf0 0%, #fdf6e3 42%, #f8eed9 78%, #f3e7cf 100%);
+
+  -webkit-mask-image:
+    radial-gradient(circle at 50% 0,    transparent 0 var(--gelombang), #000 calc(var(--gelombang) + 0.5px)),
+    radial-gradient(circle at 50% 100%, transparent 0 var(--gelombang), #000 calc(var(--gelombang) + 0.5px)),
+    radial-gradient(circle at 0 50%,    transparent 0 var(--gelombang), #000 calc(var(--gelombang) + 0.5px)),
+    radial-gradient(circle at 100% 50%, transparent 0 var(--gelombang), #000 calc(var(--gelombang) + 0.5px));
+  -webkit-mask-size:
+    var(--jarak) 100%, var(--jarak) 100%, 100% var(--jarak), 100% var(--jarak);
+  -webkit-mask-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+  -webkit-mask-composite: source-in;
+
+  mask-image:
+    radial-gradient(circle at 50% 0,    transparent 0 var(--gelombang), #000 calc(var(--gelombang) + 0.5px)),
+    radial-gradient(circle at 50% 100%, transparent 0 var(--gelombang), #000 calc(var(--gelombang) + 0.5px)),
+    radial-gradient(circle at 0 50%,    transparent 0 var(--gelombang), #000 calc(var(--gelombang) + 0.5px)),
+    radial-gradient(circle at 100% 50%, transparent 0 var(--gelombang), #000 calc(var(--gelombang) + 0.5px));
+  mask-size:
+    var(--jarak) 100%, var(--jarak) 100%, 100% var(--jarak), 100% var(--jarak);
+  mask-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+  mask-composite: intersect;
+}
+
+/* Butiran kertas halus */
+.kalender-kertas::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("../assets/paper-texture.svg");
+  background-size: 190px 190px;
+  opacity: 0.15;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+/* Garis tipis di dalam tepi gelombang , memberi kesan kertas punya tebal */
+.kalender-kertas::after {
+  content: "";
+  position: absolute;
+  inset: 15px;
+  border: 1px solid rgba(168, 60, 98, 0.13);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+/* ── Kepala kalender ── */
+.kalender-kepala {
+  position: relative;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.kalender-bulan {
+  margin: 0;
+  font-family: var(--font-judul);
+  font-size: clamp(38px, 8vw, 56px);
+  font-weight: 400;
+  line-height: 1.1;
+  color: #3d2b1f;
+  letter-spacing: 0.01em;
+}
+
+.kalender-tahun {
+  margin: 2px 0 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 13px;
+  letter-spacing: 0.42em;
+  text-indent: 0.42em;
+  text-transform: uppercase;
+  color: #8a6f52;
+}
+
+.kalender-garis {
+  height: 1px;
+  margin: 16px 4px 10px;
+  background: linear-gradient(90deg,
+    transparent, rgba(168, 60, 98, 0.3) 18%,
+    rgba(168, 60, 98, 0.3) 82%, transparent);
+}
+
+/* ── Petak tanggal ── */
+.kalender-petak {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px 0;
+}
+
+.kalender-nama-hari {
+  padding: 4px 0 8px;
+  text-align: center;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--pink-600);
+}
+
+.kalender-hari {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1 / 0.82;
+
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(14px, 3.4vw, 18px);
+  color: #4a3a2a;
+}
+
+.kalender-hari.kosong { visibility: hidden; }
+
+.kalender-angka {
+  position: relative;
+  z-index: 1;               /* angka selalu di atas hati */
+  line-height: 1;
+}
+
+/* Angka tanggal muncul berurutan seperti sedang ditulis.
+ *
+ * SENGAJA memakai animasi CSS, bukan GSAP/ScrollTrigger. Alasannya: kalau
+ * sebuah elemen disembunyikan CSS lalu hanya dimunculkan oleh ScrollTrigger,
+ * satu kegagalan saja (GSAP gagal dimuat, trigger tidak menyala) membuat
+ * elemen itu HILANG SELAMANYA. Untuk elemen penting seperti tanggal dan
+ * tanda hati, animasi CSS jauh lebih aman , selalu jalan, tanpa syarat. */
+.kalender-angka {
+  animation: muncul-angka 0.42s ease-out both;
+  animation-delay: calc(var(--i, 0) * 13ms + 120ms);
+}
+
+@keyframes muncul-angka {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.kalender-hari.spesial .kalender-angka {
+  color: var(--pink-700);
+  font-weight: 700;
+}
+
+/* Hati yang melingkari tanggal istimewa. */
+.kalender-hati {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 152%;
+  height: auto;
+  pointer-events: none;
+  z-index: 0;
+  filter: drop-shadow(0 3px 6px rgba(209, 84, 127, 0.28));
+
+  /* dua animasi: muncul seperti baru digambar, lalu berdenyut pelan */
+  animation:
+    muncul-hati 0.85s cubic-bezier(0.34, 1.56, 0.64, 1) 0.8s both,
+    denyut-hati 1.2s ease-in-out 1.7s infinite;
+}
+
+@keyframes muncul-hati {
+  0%   { opacity: 0; transform: translate(-50%, -54%) scale(0)    rotate(-24deg); }
+  70%  { opacity: 1; transform: translate(-50%, -54%) scale(1.14) rotate(5deg); }
+  100% { opacity: 1; transform: translate(-50%, -54%) scale(1)    rotate(0deg); }
+}
+
+@keyframes denyut-hati {
+  0%, 100% { transform: translate(-50%, -54%) scale(1); }
+  50%      { transform: translate(-50%, -54%) scale(1.07); }
+}
+
+/* ── Catatan ──
+   Buket lily ditata lewat .kalender-baris / .kalender-buket di atas.
+   (Sebelumnya ada .kalender-bunga berupa SVG kecil di sisi kalender;
+   sekarang digantikan foto buket.) */
+
+/* ══ Amplop & kartu ════════════════════════════════════════════════════════ */
+.bagian-kartu { text-align: center; }
+
+/* Wadah tempat amplop & kartu BERTUMPUK di titik yang sama.
+   Tingginya diatur js/main.js dalam satuan px (setinggi amplop lebih dulu,
+   lalu setinggi kartu setelah ditekan). Nilainya px langsung , bukan
+   variabel CSS , karena properti yang memakai var() tidak dianimasikan
+   oleh transition di sebagian browser, sehingga tingginya akan lompat. */
+.kartu-wadah {
+  position: relative;
+  width: min(430px, 92vw);
+  margin: 30px auto 0;
+  min-height: calc(min(430px, 92vw) * 0.625);   /* cadangan bila JS mati */
+  transition: height 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── Amplop (tampil lebih dulu) ──
+   Saat ditekan ia TIDAK terbuka seperti tutup yang mengangkat, melainkan
+   memudar lalu menghilang, digantikan kartu. */
+.kartu-wadah .amplop {
+  opacity: 1;
+  transition: opacity 0.55s ease, transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.kartu-wadah.terbuka .amplop {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-18px) scale(0.92);
+  pointer-events: none;
+}
+
+/* ── Kartu (muncul menggantikan amplop) ──
+   Keadaan awal: tersembunyi, sedikit mengecil. */
+/* Kartu: padding 0 supaya foto bisa menyentuh tepi kiri-kanan (full-bleed).
+   Jarak dalam dipindah ke bagian teksnya (.kartu-isi-teks). */
+.kartu {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 100%;
+  padding: 0;
+  z-index: 1;
+
+  transform: translateX(-50%) translateY(18px) scale(0.96);
+  opacity: 0;
+  pointer-events: none;
+
+  /* transisi CSS: kartu naik muncul saat menggantikan amplop. Tidak memakai
+     GSAP supaya tetap jalan walau pustaka gagal dimuat. */
+  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 0.6s ease;
+
+  background:
+    linear-gradient(180deg, #ffffff 0%, var(--krem) 100%);
+  border: 1.5px solid var(--pink-200);
+  border-radius: var(--radius-k);
+  box-shadow: 0 20px 46px rgba(168, 60, 98, 0.2);
+
+  text-align: left;
+  overflow: hidden;      /* foto ikut terpotong rapi mengikuti sudut kartu */
+}
+
+/* Dipakai saat amplop ditekan (dan saat GSAP tidak tersedia). */
+.kartu-wadah.terbuka .kartu {
+  transform: translateX(-50%) translateY(0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Foto 1:1 yang hampir penuh lebar kartu.
+   Karena kartu memakai padding 0, fotonya menyentuh tepi kiri-kanan ,
+   tidak ada lagi sisi kosong. Rasio 1:1 tetap dijaga oleh aspect-ratio. */
+.kartu-foto {
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+.kartu-foto img {
+  width: 100%;
+  height: auto;
+  display: block;
+  aspect-ratio: 1 / 1;   /* jaga bentuk 1:1 di semua ukuran layar */
+  object-fit: cover;
+}
+
+/* Bagian teks di bawah foto. Di sinilah jarak dalam kartu diberikan.
+   Garis hias putus-putus dipasang di sini (bukan di .kartu) supaya tidak
+   mengelilingi fotonya. */
+.kartu-isi-teks {
+  position: relative;
+  padding: 22px 24px 26px;
+}
+
+.kartu-isi-teks::after {
+  content: "";
+  position: absolute;
+  inset: 8px 14px 12px;
+  border: 1px dashed rgba(232, 115, 156, 0.32);
+  border-radius: 9px;
+  pointer-events: none;
+}
+
+.kartu-pembuka {
+  margin: 0 0 14px;
+  font-family: var(--font-judul);
+  font-size: 30px;
+  color: var(--pink-600);
+  line-height: 1.2;
+}
+
+.kartu-isi p {
+  margin: 0 0 12px;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--tinta-soft);
+}
+
+.kartu-isi p:last-child { margin-bottom: 0; }
+
+.kartu-penutup {
+  margin: 16px 0 2px;
+  font-size: 14px;
+  font-style: italic;
+  color: var(--tinta-muda);
+}
+
+.kartu-pengirim {
+  margin: 0;
+  font-family: var(--font-judul);
+  font-size: 26px;
+  color: var(--pink-700);
+}
+
+/* ══ Amplop (badan) ════════════════════════════════════════════════════════
+   Digambar sebagai satu bidang rata, TANPA bagian tutup yang mengangkat ,
+   karena amplopnya tidak "dibuka", melainkan menghilang lalu digantikan
+   kartu. Lebarnya disamakan dengan wadah supaya pas di tengah. */
+.kartu-wadah .amplop {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  width: 100%;
+  aspect-ratio: 8 / 5;   /* tingginya ikut lebar, rapi di semua layar */
+  z-index: 2;
+
+  cursor: pointer;
+  outline: none;
+}
+
+.kartu-wadah .amplop:focus-visible {
+  outline: 3px solid var(--pink-500);
+  outline-offset: 6px;
+  border-radius: 12px;
+}
+
+/* badan belakang amplop */
+.amplop-belakang {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, #f7bcd0 0%, #f095b6 100%);
+  border-radius: 12px;
+  box-shadow: 0 18px 40px rgba(168, 60, 98, 0.26);
+}
+
+/* kertas yang terlihat di dalam */
+.amplop-kertas {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 12px;
+  height: 58%;
+  background: #fffdfe;
+  border-radius: 6px;
+  box-shadow: inset 0 -8px 14px rgba(168, 60, 98, 0.08);
+}
+
+/* kantong depan amplop (lipatan bawah) */
+.amplop-depan {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(170deg, #fbd9e5 0%, #f5b0c8 100%);
+  border-radius: 12px;
+  clip-path: polygon(0 0, 50% 46%, 100% 0, 100% 100%, 0 100%);
+  z-index: 3;
+}
+
+/* bidang atas amplop (statis , tidak mengangkat seperti tutup) */
+.amplop-tutup {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 52%;
+  background: linear-gradient(180deg, #f7bcd0 0%, #ee9ebc 100%);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 6px 14px rgba(168, 60, 98, 0.14);
+  z-index: 4;
+}
+
+/* segel bunga di tengah */
+.amplop-segel {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+
+  background: #fff;
+  border: 2px solid var(--pink-300);
+  font-size: 20px;
+  box-shadow: 0 4px 12px rgba(168, 60, 98, 0.22);
+
+  transition: var(--transisi);
+}
+
+.amplop:hover .amplop-segel {
+  transform: translate(-50%, -50%) scale(1.1) rotate(12deg);
+}
+
+/* Petunjuk "Tekan amplop…" memudar setelah ditekan. */
+.bagian-kartu.terbuka #amplop-petunjuk { opacity: 0; }
+
+/* ══ Penutup ═══════════════════════════════════════════════════════════════ */
+.penutup {
+  position: relative;
+  text-align: center;
+  padding-bottom: 110px;
+}
+
+.penutup-bunga {
+  width: 96px;
+  margin: 0 auto 10px;
+  filter: drop-shadow(0 10px 20px rgba(168, 60, 98, 0.22));
+}
+
+.tombol-kejutan {
+  margin-top: 20px;
+  padding: 17px 52px;
+
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--putih);
+
+  background: linear-gradient(135deg, var(--pink-500) 0%, var(--pink-600) 100%);
+  box-shadow: 0 14px 32px rgba(209, 84, 127, 0.4);
+  transition: var(--transisi);
+}
+
+.tombol-kejutan:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 40px rgba(209, 84, 127, 0.5);
+}
+
+.tombol-kejutan:active { transform: translateY(0); }
+
+/* ══ Kocok Toples ══════════════════════════════════════════════════════════ */
+.bagian-toples { text-align: center; }
+
+.toples-panggung {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(20px, 5vw, 56px);
+  margin: 38px auto 30px;
+  max-width: 760px;
+  flex-wrap: wrap;
+}
+
+/* ── Toples kaca ─────────────────────────────────────────────────────────── */
+.toples {
+  position: relative;
+  width: clamp(140px, 30vw, 176px);
+  flex: 0 0 auto;
+}
+
+/* Tutup toples.
+   transform-origin di kiri bawah supaya saat dibuka, tutupnya terangkat dan
+   miring seperti tutup sungguhan yang diangkat dari satu sisi. */
+.toples-tutup {
+  width: 62%;
+  height: 20px;
+  margin: 0 auto -4px;
+  border-radius: 7px 7px 3px 3px;
+  background: linear-gradient(180deg, #f8b9d0 0%, #e890b0 55%, #d4789b 100%);
+  box-shadow: 0 3px 8px rgba(168, 60, 98, 0.22);
+  position: relative;
+  z-index: 3;
+  transform-origin: 12% 100%;
+  transition: transform 0.45s cubic-bezier(0.34, 1.4, 0.5, 1);
+}
+
+/* Saat toples dibuka: tutup terangkat ke atas lalu miring sedikit */
+.toples.terbuka .toples-tutup {
+  transform: translateY(-30px) rotate(-19deg);
+}
+
+/* Setelah kertas keluar, tutupnya menutup lagi */
+.toples.tertutup-lagi .toples-tutup {
+  transform: translateY(0) rotate(0deg);
+}
+
+/* Badan toples (kaca) */
+.toples-badan {
+  position: relative;
+  height: clamp(180px, 38vw, 224px);
+  border-radius: 20px 20px 26px 26px;
+  overflow: hidden;
+  background: linear-gradient(160deg,
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(255, 228, 239, 0.7) 45%,
+    rgba(251, 217, 229, 0.6) 100%);
+  border: 2px solid rgba(247, 188, 208, 0.9);
+  box-shadow:
+    inset 0 0 26px rgba(255, 255, 255, 0.85),
+    0 16px 34px rgba(168, 60, 98, 0.16);
+}
+
+/* Kilau kaca di sisi kiri */
+.toples-kaca {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(100deg,
+      rgba(255, 255, 255, 0.9) 0%,
+      rgba(255, 255, 255, 0) 26%,
+      rgba(255, 255, 255, 0) 74%,
+      rgba(255, 255, 255, 0.55) 100%);
+}
+
+/* Kertas kecil di dalam toples.
+   Posisi, putaran, dan ukurannya DIACAK oleh js/main.js, jadi tumpukannya
+   terlihat seperti kertas yang benar-benar dituang, bukan barisan rapi.
+   Karena itu di sini hanya dipakai penempatan absolute. */
+.toples-kertas {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.toples-kertas i {
+  position: absolute;
+  display: block;
+  border-radius: 2px;
+  border: 1px solid rgba(232, 144, 176, 0.42);
+  box-shadow: 0 1px 2px rgba(168, 60, 98, 0.1);
+}
+
+/* ── Kertas yang terbang keluar dari toples ─────────────────────────────────
+   Elemen ini meluncur dari mulut toples menuju kartu, jadi gerakannya
+   terlihat seperti kertas yang benar-benar berpindah tempat. */
+.toples-terbang {
+  position: absolute;
+  left: 50%;
+  top: 10px;
+  width: 34px;
+  height: 24px;
+  margin-left: -17px;
+
+  border-radius: 3px;
+  background: linear-gradient(150deg, #ffffff 0%, #ffeaf3 100%);
+  border: 1px solid rgba(232, 144, 176, 0.55);
+  box-shadow: 0 4px 12px rgba(168, 60, 98, 0.2);
+
+  opacity: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+
+/* ── Kertas hasil ────────────────────────────────────────────────────────── */
+.toples-hasil {
+  position: relative;
+  flex: 1 1 300px;
+  max-width: 420px;
+  min-height: 132px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 30px 30px 32px;
+  text-align: left;
+
+  background: linear-gradient(180deg, #ffffff 0%, var(--krem) 100%);
+  border: 1.5px solid var(--pink-200);
+  border-radius: var(--radius);
+  box-shadow: var(--bayang-k);
+
+  /* Sudut kertas terlipat, meniru kertas catatan */
+  clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 0 100%);
+}
+
+/* Lipatan sudut kanan atas */
+.toples-hasil::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 22px;
+  height: 22px;
+  background: linear-gradient(225deg,
+    var(--pink-100) 0%, var(--pink-200) 48%, transparent 50%);
+  pointer-events: none;
+}
+
+/* Isi harapan yang keluar dari toples.
+   Memakai font TEKS (Nunito), bukan font sambung. Sebelumnya memakai
+   --font-judul (Great Vibes) yang hurufnya bersambung sehingga kalimat
+   panjang jadi sulit dibaca. Ukurannya juga dibuat lebih tenang supaya
+   nyaman dibaca berulang kali. */
+.toples-teks {
+  margin: 0;
+  font-family: var(--font-teks);
+  font-size: clamp(16px, 2.6vw, 19px);
+  font-weight: 600;
+  line-height: 1.72;
+  letter-spacing: 0.005em;
+  color: var(--pink-800);
+  text-align: left;
+  text-wrap: pretty;      /* hindari satu kata menggantung di baris akhir */
+}
+
+/* Kertas kosong sebelum tombol ditekan */
+.toples-hasil.kosong .toples-teks {
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--tinta-muda);
+  text-align: center;
+}
+
+/* Saat kertas sedang diganti */
+.toples-hasil.kocok .toples-teks { opacity: 0; }
+
+/* ── Tombol ──────────────────────────────────────────────────────────────── */
+.tombol-kocok {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  padding: 16px 40px;
+
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+
+  font-family: inherit;
+  font-size: 16.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #fff;
+
+  background: linear-gradient(135deg, var(--pink-500) 0%, var(--pink-600) 100%);
+  box-shadow: 0 12px 26px rgba(200, 70, 118, 0.3);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.tombol-kocok:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 32px rgba(200, 70, 118, 0.36);
+}
+
+.tombol-kocok:active { transform: translateY(0) scale(0.98); }
+
+.tombol-kocok[disabled] {
+  opacity: 0.6;
+  cursor: wait;
+  transform: none;
+}
+
+/* Ikon berputar saat toples dikocok */
+.tombol-kocok-ikon {
+  display: inline-block;
+  font-size: 19px;
+  line-height: 1;
+}
+
+.tombol-kocok.kocok .tombol-kocok-ikon {
+  animation: putarKocok 0.55s linear infinite;
+}
+
+@keyframes putarKocok {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ══ Footer ════════════════════════════════════════════════════════════════ */
+.kaki {
+  padding: 40px 24px 52px;
+  text-align: center;
+  border-top: 1px solid rgba(247, 188, 208, 0.6);
+  background: rgba(255, 255, 255, 0.42);
+}
+
+.kaki-teks {
+  margin: 0;
+  font-size: 12.5px;
+  letter-spacing: 0.08em;
+  color: var(--tinta-muda);
+}
+
+/* ══ Animasi masuk ══════════════════════════════════════════════════════════
+   Elemen yang akan dianimasikan disembunyikan HANYA bila JavaScript aktif
+   (html punya class "js"). GSAP lalu memunculkannya.
+
+   Bila GSAP gagal dimuat, main.js menghapus class "js" sehingga semua isi
+   langsung tampil , halaman tidak pernah kosong. GSAP sendiri dimuat dari
+   berkas lokal (assets/vendor), jadi tidak bergantung pada internet.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Keadaan awal: tersembunyi, menunggu GSAP. */
+.js .hero-baris      { opacity: 0; transform: translateY(34px); }
+.js .hero-bunga-atas { opacity: 0; }
+.js .hero-kue        { opacity: 0; }
+.js .gulir-petunjuk  { opacity: 0; }
+.js .bagian-judul    { opacity: 0; transform: translateY(30px); }
+.js .bagian-kecil    { opacity: 0; transform: translateY(16px); }
+.js .ucapan          { opacity: 0; }
+.js .kartu-wadah    { opacity: 0; }
+.js .penutup-bunga   { opacity: 0; }
+.js .tombol-kejutan  { opacity: 0; }
+.js .toples          { opacity: 0; transform: translateY(26px); }
+.js .toples-hasil    { opacity: 0; transform: translateY(26px); }
+.js .tombol-kocok    { opacity: 0; transform: translateY(20px); }
+.js .kaki            { opacity: 0; }
+.js .kalender-angka  { opacity: 0; }
+.js .kalender-hati   { opacity: 0; }
+.js .kalender-buket  { opacity: 0; }
+
+/* Layar rendah (laptop kecil / jendela tidak maksimal).
+   Isi hero dikecilkan lagi supaya semuanya tetap muat satu layar. */
+@media (max-height: 780px) {
+  .hero-bunga-atas { width: clamp(104px, 16vw, 150px); max-height: 22vh; }
+  .hero-bunga-atas img { max-height: 22vh; }
+  .hero-nama { font-size: clamp(34px, 7.4vw, 68px); }
+  .hero-kue { width: clamp(72px, 10vw, 98px); }
+  .hero-kecil { font-size: 12px; }
+  .hero-judul { font-size: clamp(16px, 2.1vw, 20px); }
+  .hero-sub { font-size: 14px; }
+  .hero-tanggal, .hero-umur { padding: 5px 13px; font-size: 12px; }
+}
+
+/* ══ Hormati "kurangi gerakan" ═════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  /* Semua yang disembunyikan untuk animasi tetap ditampilkan.
+     main.js juga melewati seluruh animasi saat mode ini aktif. */
+  .js .hero-baris,
+  .js .hero-bunga-atas,
+  .js .hero-kue,
+  .js .gulir-petunjuk,
+  .js .bagian-judul,
+  .js .bagian-kecil,
+  .js .ucapan,
+  .js .kartu-wadah,
+  .js .penutup-bunga,
+  .js .tombol-kejutan,
+  .js .toples,
+  .js .toples-hasil,
+  .js .tombol-kocok,
+  .js .kaki,
+  .js .kalender-angka,
+  .js .kalender-hati,
+  .js .kalender-buket {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Kartu tetap tersembunyi sampai amplop ditekan , termasuk saat mode
+     "kurangi gerakan" aktif. */
+  .js .kartu-wadah.terbuka .kartu {
+    opacity: 1 !important;
+    transform: translateX(-50%) !important;
+  }
+  .kalender-hati { transform: translate(-50%, -54%) !important; }
+}
+
+/* ══ TABLET & PONSEL (≤ 720px) ════════════════════════════════════════════
+   Tataletak diubah dari mendatar menjadi bertumpuk (vertikal), ukuran
+   huruf disesuaikan, dan bunga tepi dikecilkan supaya tidak menutupi teks.
+   Ditulis dengan "mobile-first thinking": semua yang perlu diubah untuk
+   layar sempit dikumpulkan di sini. */
+@media (max-width: 720px) {
+  body { font-size: 16px; }
+
+  .bagian { padding: 56px 18px; }
+
+  /* Bunga tepi: hanya 2 yang tersisa, dikecilkan, dibuat lebih pudar
+     supaya tulisan tetap nyaman dibaca di layar sempit. */
+  .bunga-pinggir { opacity: 0.42; }
+  .kiri-1  { width: 58px;  left: -16px; top: 18vh; }
+  .kanan-1 { width: 62px;  right: -16px; top: 60vh; }
+  .kiri-2  { width: 50px;  left: -14px; top: 80vh; opacity: 0.3; }
+  .kanan-2 { display: none; }
+  .kiri-3, .kanan-3 { display: none; }
+
+  /* Tombol musik: menempel di sudut, menghormati poni/notch layar. */
+  .tombol-musik {
+    top: max(10px, env(safe-area-inset-top));
+    right: max(10px, env(safe-area-inset-right));
+    padding: 8px 13px;
+    font-size: 12px;
+  }
+
+  /* ── Hero ──────────────────────────────────────────────────────────────
+     Di ponsel ruang vertikal sangat terbatas, jadi semua dikecilkan dan
+     jaraknya dirapatkan supaya tetap muat satu layar penuh. */
+  .hero {
+    padding: calc(56px + env(safe-area-inset-top)) 18px calc(56px + env(safe-area-inset-bottom));
+    gap: 4px;
+  }
+  .hero-bunga-atas { width: min(46vw, 170px); max-height: 24vh; }
+  .hero-bunga-atas img { max-height: 24vh; }
+  .hero-kecil { font-size: 11px; letter-spacing: 0.18em; }
+  .hero-nama { font-size: clamp(34px, 12.5vw, 60px); padding: 0.1em 0.06em 0.18em; }
+  .hero-judul { font-size: 17px; }
+  .hero-sub { font-size: 14px; }
+  .hero-tanggal-baris { gap: 8px; margin-top: 10px; }
+  .hero-tanggal, .hero-umur { padding: 6px 14px; font-size: 12px; }
+  .hero-kue { width: min(28vw, 96px); margin-top: 12px; }
+  .gulir-petunjuk { bottom: max(14px, env(safe-area-inset-bottom)); font-size: 10px; }
+
+  /* Kalender: buket pindah ke ATAS kalender */
+  .kalender-baris {
+    flex-direction: column;
+    gap: 0;
+  }
+  .kalender-buket {
+    width: min(62vw, 250px);
+    margin-right: 0;
+    margin-bottom: -54px;
+  }
+  /* Di ponsel tetap miring ke KIRI ATAS, searah dengan versi desktop. */
+  .kalender-buket img { transform: rotate(-8deg); transform-origin: 55% 92%; }
+  .kalender-bungkus { width: 100%; max-width: 420px; }
+
+  .kalender-kertas {
+    --gelombang: 7px;
+    --jarak: 14px;
+    padding: 24px 14px 20px;
+  }
+  .kalender-nama-hari { font-size: 9px; letter-spacing: 0.03em; }
+  .kalender-bulan { font-size: 24px; }
+
+  /* ── Ucapan ──────────────────────────────────────────────────────────── */
+  /* Timeline dirapatkan: bulatan nomor & garis digeser lebih ke tepi. */
+  .daftar-ucapan { padding-left: 60px; }
+  .daftar-ucapan::before { left: 19px; }
+  .ucapan { padding: 22px 20px 20px; margin-bottom: 18px; }
+  .ucapan::after { left: -26px; width: 26px; top: 36px; }
+  .ucapan-ikon { left: -60.5px; top: 16px; width: 38px; height: 38px; font-size: 12px; }
+  .bagian-judul { font-size: 26px; }
+
+  /* ── Amplop & kartu ──────────────────────────────────────────────────── */
+  /* Kartu tetap padding 0 (foto full-bleed); jarak dalam ada di blok teks. */
+  .kartu-isi-teks { padding: 20px 20px 24px; }
+  .kartu-pembuka { font-size: 26px; }
+  .kartu-isi p { font-size: 15px; }
+}
+
+/* Ponsel sedang (≤ 480px) , penyesuaian lebih lanjut */
+@media (max-width: 480px) {
+  body { font-size: 15.5px; }
+
+  .bagian { padding: 48px 16px; }
+
+  .hero-nama { font-size: clamp(30px, 13vw, 46px); }
+  .hero-bunga-atas { width: min(50vw, 150px); }
+
+  .kalender-buket { width: min(66vw, 220px); margin-bottom: -48px; }
+  .kalender-kertas { padding: 20px 10px 16px; --gelombang: 6px; --jarak: 12px; }
+  .kalender-nama-hari { font-size: 8px; }
+  .kalender-bulan { font-size: 21px; }
+
+  .bagian-judul { font-size: 23px; }
+  .daftar-ucapan { padding-left: 48px; }
+  .daftar-ucapan::before { left: 15px; }
+  .ucapan { padding: 18px 16px 16px; margin-bottom: 16px; }
+  .ucapan::after { left: -22px; width: 22px; top: 32px; }
+  .ucapan-ikon { left: -49.5px; top: 14px; width: 32px; height: 32px; font-size: 11px; }
+  .ucapan-judul { font-size: 18px; }
+
+  .kartu-isi-teks { padding: 18px 16px 22px; }
+  .kartu-pembuka { font-size: 24px; }
+  .kartu-isi p { font-size: 14.5px; }
+}
+
+/* Layar sangat kecil (≤ 360px) , hanya teks penting yang ditampilkan */
+@media (max-width: 360px) {
+  .tombol-musik #musik-teks { display: none; }
+  .tombol-musik { padding: 9px 11px; }
+  .hero-nama { font-size: clamp(26px, 12vw, 38px); }
+  .kalender-buket { width: 62vw; margin-bottom: -40px; }
+}
+
+/* Ponsel dalam posisi mendatar (landscape) dengan tinggi layar pendek:
+   isi hero dirapatkan supaya tetap muat satu layar. */
+@media (max-width: 900px) and (max-height: 460px) and (orientation: landscape) {
+  .hero {
+    min-height: auto;
+    padding: 56px 24px 48px;
+    gap: 2px;
+  }
+  .hero-bunga-atas { width: min(20vw, 120px); max-height: 30vh; }
+  .hero-bunga-atas img { max-height: 30vh; }
+  .hero-nama { font-size: clamp(28px, 6vw, 44px); }
+  .hero-kue { width: min(14vw, 80px); margin-top: 6px; }
+  .gulir-petunjuk { display: none; }
+}
+
+/* ══ Cetak ═════════════════════════════════════════════════════════════════ */
+@media print {
+  .latar, .confetti, .tombol-musik, .bunga-pinggir, .gulir-petunjuk { display: none; }
+  body { background: #fff; }
+  /* Saat dicetak: amplop disembunyikan, kartunya yang tampil. */
+  .amplop { display: none !important; }
+  .kartu-wadah { min-height: 0 !important; }
+  .kartu { opacity: 1 !important; transform: none !important;
+           position: static !important; width: 100% !important; }
+}

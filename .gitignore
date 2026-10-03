@@ -1,0 +1,31 @@
+# ── Berkas sistem operasi ──────────────────────────────────────────────────
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+._*
+
+# ── Editor & IDE ───────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── Berkas sementara & cadangan ────────────────────────────────────────────
+*.tmp
+*.temp
+*.bak
+*.orig
+*.log
+
+# ── Berkas bantu pengembangan ──────────────────────────────────────────────
+# Berkas uji coba dan pratinjau tidak perlu ikut diunggah.
+_preview-*.html
+_uji-*.html
+
+# ── Node (bila suatu saat memakai alat bantu) ──────────────────────────────
+node_modules/
+npm-debug.log*
+package-lock.json

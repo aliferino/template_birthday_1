@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 110" width="120" height="110"
+     role="img" aria-label="Hati digambar tangan">
+  <defs>
+    <linearGradient id="hatiIsi" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#fbd9e5"/>
+      <stop offset="60%"  stop-color="#f7bcd0"/>
+      <stop offset="100%" stop-color="#f095b6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Bentuk hati utama. Sengaja sedikit tidak simetris supaya terasa
+       digambar tangan, bukan bentuk geometris yang kaku. -->
+  <path d="M60 100
+           C 34 78, 12 60, 11 42
+           C 10 26, 21 13, 36 13
+           C 47 13, 55 19, 60 28
+           C 65 19, 73 13, 84 13
+           C 99 13, 110 26, 109 42
+           C 108 60, 86 78, 60 100 Z"
+        fill="url(#hatiIsi)"
+        stroke="#d1547f"
+        stroke-width="3.4"
+        stroke-linejoin="round"/>
+
+  <!-- Coretan kedua yang sedikit bergeser → kesan garis tangan -->
+  <path d="M60 96
+           C 37 76, 17 59, 16 43
+           C 15 29, 25 18, 37 18
+           C 46 18, 54 23, 60 32"
+        fill="none"
+        stroke="#e8739c"
+        stroke-width="1.6"
+        stroke-linecap="round"
+        opacity="0.55"/>
+
+  <!-- Kilau kecil di sisi kiri -->
+  <path d="M28 30 C 32 24, 39 22, 44 24"
+        fill="none" stroke="#ffffff" stroke-width="2.6"
+        stroke-linecap="round" opacity="0.7"/>
+</svg>

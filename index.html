@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Selamat Ulang Tahun</title>
+<meta name="description" content="Kartu ucapan ulang tahun bertema bunga pink.">
+<meta name="theme-color" content="#fff0f5">
+
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+
+<!-- Ambil lagunya lebih awal supaya mulai cepat saat diputar -->
+<link rel="preload" href="assets/lagu.mp3" as="audio" type="audio/mpeg">
+
+<script>
+  /* Dijalankan PALING AWAL, sebelum halaman digambar.
+     Refresh (termasuk hard refresh) harus mengulang halaman dari atas.
+     Harus di sini, bukan di js/main.js, karena browser memulihkan posisi
+     gulir terakhir SEBELUM DOMContentLoaded. Bila dipasang belakangan,
+     halamannya sudah terlanjur melompat ke posisi lama. */
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  window.scrollTo(0, 0);
+</script>
+
+<!-- Font dari Google Fonts. Bila offline, CSS sudah menyediakan font
+     cadangan (Segoe Script / Brush Script MT / cursive) sehingga tetap rapi. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/style.css">
+
+<!-- Penanda "JS aktif".
+     Elemen yang dianimasikan disembunyikan hanya bila class ini ada, jadi
+     bila JavaScript dimatikan atau gagal dimuat, seluruh teks tetap tampil
+     dan halaman tidak pernah kosong. Harus dijalankan SEBELUM halaman
+     digambar supaya tidak ada kedipan. -->
+<script>document.documentElement.classList.add("js");</script>
+</head>
+<body>
+
+<!-- ══ Lapisan latar ══════════════════════════════════════════════════════
+     Semua lapisan ini posisinya tetap (fixed) dan tidak menangkap klik,
+     jadi halaman tetap bisa digulir dengan normal. -->
+<div class="latar" aria-hidden="true">
+  <div class="latar-pola"></div>
+  <div class="latar-cahaya"></div>
+  <canvas id="kelopak" class="latar-kelopak"></canvas>
+</div>
+
+<!-- Bunga di sisi kiri-kanan web, bergerak pelan saat digulir (parallax).
+     Dipakai lima jenis: cosmos, plumeria, daisy, lily, dan matahari ,
+     supaya tepi halaman terasa beragam, bukan bunga yang itu-itu saja. -->
+<div class="bunga-pinggir kiri-1" data-arah="kiri" aria-hidden="true">
+  <img src="assets/bunga-cosmos.webp" alt="">
+</div>
+<div class="bunga-pinggir kanan-1" data-arah="kanan" aria-hidden="true">
+  <img src="assets/bunga-plumeria.webp" alt="">
+</div>
+<div class="bunga-pinggir kiri-2" data-arah="kiri" aria-hidden="true">
+  <img src="assets/bunga-daisy.webp" alt="">
+</div>
+<div class="bunga-pinggir kanan-2" data-arah="kanan" aria-hidden="true">
+  <img src="assets/bunga-lily.webp" alt="">
+</div>
+<div class="bunga-pinggir kiri-3" data-arah="kiri" aria-hidden="true">
+  <img src="assets/bunga-matahari.webp" alt="">
+</div>
+<div class="bunga-pinggir kanan-3" data-arah="kanan" aria-hidden="true">
+  <img src="assets/bunga-cosmos.webp" alt="">
+</div>
+
+<!-- Canvas ledakan bunga (di atas segalanya, hanya aktif saat tombol ditekan) -->
+<canvas id="confetti" class="confetti" aria-hidden="true"></canvas>
+
+<!-- Tombol musik (selalu terlihat). Menyalakan atau membisukan lagu. -->
+<button id="tombol-musik" class="tombol-musik" type="button"
+        aria-pressed="false" title="Nyalakan atau bisukan lagu">
+  <span id="musik-ikon" aria-hidden="true">🔇</span>
+  <span id="musik-teks">Musik: mati</span>
+</button>
+
+<!-- ══ HERO ═══════════════════════════════════════════════════════════════ -->
+<header class="hero" id="hero">
+  <div class="hero-cahaya" aria-hidden="true"></div>
+
+  <!-- Chibi Maruko di bagian landing -->
+  <div class="hero-bunga-atas" id="hero-bunga-atas">
+    <img src="assets/chibi-maruko.webp" alt="Chibi Maruko membawa buket bunga"
+         width="520" height="715">
+  </div>
+
+  <p class="hero-baris hero-kecil">Selamat Ulang Tahun</p>
+
+  <h1 class="hero-baris hero-nama" id="hero-nama">Nama Panggilan</h1>
+
+  <p class="hero-baris hero-judul" id="hero-judul">Selamat Ulang Tahun</p>
+
+  <p class="hero-baris hero-sub" id="hero-sub">Hari istimewa untuk orang istimewa</p>
+
+  <div class="hero-baris hero-tanggal-baris">
+    <span class="hero-tanggal" id="hero-tanggal">31 Juli 2026</span>
+    <span class="hero-umur" id="hero-umur"></span>
+  </div>
+
+  <div class="hero-kue" aria-hidden="true">
+    <img src="assets/cake.svg" alt="" width="200" height="200">
+  </div>
+
+  <div class="gulir-petunjuk" id="gulir-petunjuk">
+    <span>gulir ke bawah</span>
+    <span class="gulir-panah" aria-hidden="true">↓</span>
+  </div>
+</header>
+
+<!-- ══ UCAPAN ═════════════════════════════════════════════════════════════ -->
+<main>
+
+  <!-- ══ KALENDER ════════════════════════════════════════════════════════
+       Kalender bergaya kertas prangko: tepi bergelombang MASUK ke dalam.
+       Tanggalnya dihitung otomatis oleh js/calendar.js dari js/config.js. -->
+  <section class="bagian bagian-kalender">
+    <div class="kalender-baris">
+
+      <!-- Buket bunga lily di sebelah kiri kalender -->
+      <picture class="kalender-buket">
+        <source srcset="assets/buket-lily.webp" type="image/webp">
+        <img src="assets/buket-lily-fallback.png"
+             alt="Buket bunga lily pink" width="654" height="700">
+      </picture>
+
+      <div class="kalender-bungkus">
+        <!-- Pembungkus bayangan: dipisah dari kertas karena elemen bermask
+             akan memotong bayangannya sendiri. -->
+        <div class="kalender-bayang">
+          <div class="kalender-kertas">
+            <div class="kalender-kepala">
+              <h2 class="kalender-bulan" id="kalender-bulan">Juli</h2>
+              <p class="kalender-tahun" id="kalender-tahun">2026</p>
+            </div>
+
+            <div class="kalender-garis" aria-hidden="true"></div>
+
+            <div class="kalender-petak" id="kalender-petak"
+                 role="grid" aria-label="Kalender bulan Juli 2026"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bagian bagian-ucapan">
+    <h2 class="bagian-judul">Ucapan &amp; Doa</h2>
+    <p class="bagian-kecil">Empat hal yang kuharap untukmu tahun ini</p>
+    <div class="daftar-ucapan" id="daftar-ucapan"></div>
+  </section>
+
+  <!-- ══ AMPLOP → KARTU ══════════════════════════════════════════════════
+       Di awal yang tampil adalah AMPLOP. Saat ditekan, amplop TIDAK terbuka
+       seperti tutup yang mengangkat , ia langsung MEMUDAR & MENGHILANG,
+       lalu digantikan oleh kartu yang muncul di tempat yang sama. -->
+  <section class="bagian bagian-kartu">
+    <h2 class="bagian-judul">Ada Kartu Untukmu</h2>
+    <p class="bagian-kecil" id="amplop-petunjuk">Tekan amplop untuk membukanya</p>
+
+    <div class="kartu-wadah" id="kartu-wadah">
+      <!-- Amplop: tampil lebih dulu -->
+      <div class="amplop" id="amplop" role="button" tabindex="0"
+           aria-label="Buka kartu ucapan">
+        <div class="amplop-belakang"></div>
+        <div class="amplop-kertas"></div>
+        <div class="amplop-depan"></div>
+        <div class="amplop-tutup"></div>
+        <div class="amplop-segel" aria-hidden="true">♥</div>
+      </div>
+
+      <!-- Kartu: menggantikan amplop setelah ditekan.
+           Foto 1:1 di atas (hampir penuh lebar), kata-kata di bawahnya. -->
+      <div class="kartu" id="kartu" aria-hidden="true">
+        <div class="kartu-foto">
+          <img src="assets/kartu-foto.webp"
+               alt="Buket kenangan" width="560" height="560">
+        </div>
+
+        <div class="kartu-isi-teks">
+          <p class="kartu-pembuka" id="kartu-pembuka">Untuk kamu,</p>
+          <div class="kartu-isi" id="kartu-isi"></div>
+          <p class="kartu-penutup" id="kartu-penutup"></p>
+          <p class="kartu-pengirim" id="kartu-pengirim"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ PENUTUP ═════════════════════════════════════════════════════════ -->
+  <section class="bagian penutup">
+    <div class="penutup-bunga" aria-hidden="true">
+      <img src="assets/buket-lily-kecil.png" alt="" width="336" height="360">
+    </div>
+    <h2 class="bagian-judul" id="penutup-judul">Bahagia selalu</h2>
+    <p class="bagian-kecil" id="penutup-isi">Tekan tombol di bawah untuk melihat sesuatu yang menakjubkan</p>
+    <button class="tombol-kejutan" id="tombol-kejutan" type="button">Lihat Kejutan!</button>
+  </section>
+
+  <!-- ══ TOPLES HARAPAN ══════════════════════════════════════════════════
+       Tombol ditekan, lalu satu harapan keluar secara acak dari toples.
+       Isi harapannya ada di data/harapan.json supaya berkas ini tetap
+       ringan dan mudah ditambah tanpa menyentuh kode. -->
+  <section class="bagian bagian-toples">
+    <h2 class="bagian-judul">Toples Harapan</h2>
+    <p class="bagian-kecil">Kocok toplesnya, ambil satu harapan untuk tahun ini</p>
+
+    <div class="toples-panggung">
+      <!-- Toples -->
+      <div class="toples" id="toples" aria-hidden="true">
+        <div class="toples-tutup" id="toples-tutup"></div>
+        <div class="toples-badan">
+          <div class="toples-kertas" id="toples-kertas"></div>
+          <div class="toples-kaca"></div>
+        </div>
+        <!-- Kertas yang terbang keluar dari toples menuju kartu -->
+        <div class="toples-terbang" id="toples-terbang"></div>
+      </div>
+
+      <!-- Kertas yang keluar -->
+      <div class="toples-hasil" id="toples-hasil" role="status" aria-live="polite">
+        <p class="toples-teks" id="toples-teks">Tekan tombol di bawah untuk mengambil satu harapan.</p>
+      </div>
+    </div>
+
+    <button class="tombol-kocok" id="tombol-kocok" type="button">
+      <span class="tombol-kocok-ikon" aria-hidden="true">↻</span>
+      <span id="tombol-kocok-teks">Kocok Toples</span>
+    </button>
+
+  </section>
+</main>
+
+<!-- ══ FOOTER ═════════════════════════════════════════════════════════════ -->
+<footer class="kaki">
+  <p class="kaki-teks">Dibuat dengan sepenuh hati</p>
+</footer>
+
+<!-- GSAP dimuat dari berkas LOKAL (assets/vendor), bukan CDN.
+     Alasannya: dengan CDN, saat internet mati GSAP gagal dimuat dan seluruh
+     animasi mati. Karena elemennya disembunyikan lebih dulu oleh CSS,
+     halaman jadi kosong , bukan sekadar tidak beranimasi.
+     main.js tetap punya jaring pengaman: bila GSAP tidak ada, penanda "js"
+     dihapus dan semua isi langsung tampil. -->
+<script src="assets/vendor/gsap.min.js"></script>
+<script src="assets/vendor/ScrollTrigger.min.js"></script>
+
+<script src="js/config.js"></script>
+<script src="js/music.js"></script>
+<script src="js/petals.js"></script>
+<script src="js/calendar.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
