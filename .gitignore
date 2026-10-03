@@ -21,6 +21,8 @@ $RECYCLE.BIN/
 *.log
 
 # ── Berkas bantu pengembangan ──────────────────────────────────────────────
+.hermes-tmp*/
+
 # Berkas uji coba dan pratinjau tidak perlu ikut diunggah.
 _preview-*.html
 _uji-*.html
