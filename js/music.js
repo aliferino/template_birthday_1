@@ -73,7 +73,26 @@
       a.volume = this.opsi.volume;
       a.setAttribute("playsinline", "");     // iOS: jangan buka pemutar penuh
 
+      /* PENTING: event "error" di sini TIDAK selalu berarti berkas lagunya
+         gagal dimuat. Browser juga memicunya untuk masalah PERANGKAT SUARA,
+         misalnya "OnMediaSinkAudioError" ketika komputer tidak punya speaker
+         atau headphone. Kalau itu yang terjadi, berkasnya sebenarnya sudah
+         termuat penuh dan lagunya tetap berjalan, hanya tidak terdengar.
+
+         Karena itu diperiksa dulu sebelum ditandai gagal. Tanpa pemeriksaan
+         ini, tombolnya akan menulis "gagal dimuat" padahal lagunya normal,
+         dan itu menyesatkan. */
       a.addEventListener("error", () => {
+        const pesan = a.error ? String(a.error.message || "") : "";
+
+        /* Masalah perangkat suara, bukan masalah berkas. */
+        const soalPerangkat = /sink|device|output|audioerror/i.test(pesan);
+
+        /* Berkasnya sudah cukup termuat untuk diputar. */
+        const berkasSiap = a.readyState >= 3;   // HAVE_FUTURE_DATA ke atas
+
+        if (soalPerangkat || berkasSiap) return;
+
         this.gagal = true;
         this._lapor();
       });
@@ -181,44 +200,55 @@
       this._lapor();
     }
 
-    /* Pasang pembuka bisu: pada sentuhan pertama, suaranya dinyalakan.
+    /* Pasang pembuka bisu: pada sentuhan/klik pertama, suaranya dinyalakan.
      *
-     * Dilepas sendiri setelah berhasil, jadi tidak ada pendengar menganggur.
-     * Bila pengguna sendiri yang membisukan, pembuka ini tidak dipasang,
-     * supaya musiknya tidak menyala lagi tanpa dikehendaki. */
+     * PENTING: browser hanya menganggap klik, ketukan (touchend), dan tombol
+     * keyboard sebagai "aksi pengguna" yang boleh menyalakan suara. Event
+     * "scroll", "wheel", dan "touchstart" TIDAK dihitung. Karena itu pembuka
+     * ini tidak mau lepas sebelum suaranya benar-benar berbunyi. Kalau
+     * percobaan gagal (event belum dihitung browser), lagunya dibisukan
+     * lagi dan pembuka menunggu event berikutnya. */
     pasangPembukaBisu() {
       if (this._pembukaTerpasang) return;
       this._pembukaTerpasang = true;
 
-      const kejadian = ["pointerdown", "click", "touchstart", "keydown", "wheel", "scroll"];
+      const kejadian = ["pointerdown", "mousedown", "pointerup", "touchend", "click", "keydown"];
+
+      const lepas = () => {
+        kejadian.forEach((k) => window.removeEventListener(k, buka, true));
+        this._pembukaTerpasang = false;
+      };
 
       const buka = () => {
         /* Pengguna membisukan sendiri: jangan diganggu. */
         if (this.dibisukanPengguna) { lepas(); return; }
 
-        this.audio.muted = false;
-        this.menungguSentuhan = false;
-        this.bisu = false;
-        this._lapor();
-        lepas();
+        const a = this.audio;
+        a.muted = false;
 
-        /* Bila ternyata belum berjalan (misal dijeda browser), coba lagi. */
-        if (this.audio.paused) this._putar();
+        const janji = a.paused ? this._putar() : Promise.resolve(true);
+        janji.then((ok) => {
+          if (ok && !a.paused && !a.muted) {
+            this.menungguSentuhan = false;
+            this.bisu = false;
+            this._lapor();
+            lepas();
+          } else {
+            /* Belum diizinkan browser. Tetap bisu, tunggu event berikutnya. */
+            a.muted = true;
+            if (a.paused) this._putar();
+          }
+        });
       };
 
-      const lepas = () => {
-        kejadian.forEach((k) => window.removeEventListener(k, buka));
-        this._pembukaTerpasang = false;
-      };
+      kejadian.forEach((k) => window.addEventListener(k, buka, true));
 
-      kejadian.forEach((k) =>
-        window.addEventListener(k, buka, { passive: true }));
-
-      /* Cadangan: kalau halaman sudah selesai dimuat dan pengguna kebetulan
-         sudah pernah berinteraksi dengan situs ini, coba nyalakan langsung. */
+      /* Cadangan: hanya bila browser mencatat pengguna sudah pernah
+         berinteraksi dengan halaman ini. */
       window.setTimeout(() => {
-        if (this.menungguSentuhan && !this.dibisukanPengguna) buka();
-      }, 3000);
+        const sudahAktif = navigator.userActivation && navigator.userActivation.hasBeenActive;
+        if (sudahAktif && this.menungguSentuhan && !this.dibisukanPengguna) buka();
+      }, 1500);
     }
 
     jeda() {
