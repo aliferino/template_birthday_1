@@ -37,7 +37,86 @@
      digambar supaya tidak ada kedipan. -->
 <script>document.documentElement.classList.add("js");</script>
 </head>
-<body>
+<body class="terkunci">
+
+<!-- ══ PEMBUKA ═════════════════════════════════════════════════════════════
+     Layar kado yang harus diklik sebelum halaman muncul.
+
+     Ini bukan sekadar hiasan: klik pada kado adalah SENTUHAN PENGGUNA, dan
+     browser hanya mengizinkan suara berbunyi setelah ada sentuhan. Karena
+     itu musiknya diputar tepat di dalam penangan klik kado, bukan saat
+     halaman dimuat. Dengan cara ini putar otomatisnya hampir pasti berhasil
+     di semua browser, termasuk Chrome dan peramban bawaan HP.
+
+     Layar ini dilepas sendiri oleh js/pembuka.js. Bila JavaScript mati,
+     layar ini tetap ada, jadi ada tombol cadangan di dalamnya. -->
+<div class="pembuka" id="pembuka">
+  <div class="pembuka-isi">
+
+    <p class="pembuka-atas">Ada hadiah untukmu</p>
+
+    <button class="kado" id="kado" type="button"
+            aria-label="Ketuk kado untuk membuka halaman">
+      <svg class="kado-gambar" viewBox="0 0 200 210" aria-hidden="true">
+        <defs>
+          <linearGradient id="kadoBadan" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#f7bcd0"/>
+            <stop offset="100%" stop-color="#f095b6"/>
+          </linearGradient>
+          <linearGradient id="kadoTutup" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#f095b6"/>
+            <stop offset="100%" stop-color="#e8739c"/>
+          </linearGradient>
+          <linearGradient id="kadoPita" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#e8c078"/>
+            <stop offset="100%" stop-color="#d9a54a"/>
+          </linearGradient>
+        </defs>
+
+        <!-- bayangan di lantai -->
+        <ellipse class="kado-bayang" cx="100" cy="196" rx="64" ry="9"
+                 fill="rgba(168,60,98,0.16)"/>
+
+        <!-- badan kotak -->
+        <rect x="34" y="92" width="132" height="94" rx="9" fill="url(#kadoBadan)"/>
+        <rect x="34" y="92" width="132" height="94" rx="9"
+              fill="none" stroke="rgba(168,60,98,0.18)" stroke-width="1.5"/>
+
+        <!-- tutup kotak -->
+        <rect x="24" y="70" width="152" height="32" rx="8" fill="url(#kadoTutup)"/>
+        <rect x="24" y="70" width="152" height="32" rx="8"
+              fill="none" stroke="rgba(168,60,98,0.2)" stroke-width="1.5"/>
+
+        <!-- pita tegak -->
+        <rect x="88" y="70" width="24" height="116" fill="url(#kadoPita)"/>
+
+        <!-- pita melintang di tutup -->
+        <rect x="24" y="78" width="152" height="15" fill="url(#kadoPita)"/>
+
+        <!-- simpul pita -->
+        <path d="M100 70
+                 C 84 48, 62 44, 60 58
+                 C 58 70, 82 70, 100 70 Z"
+              fill="url(#kadoPita)"/>
+        <path d="M100 70
+                 C 116 48, 138 44, 140 58
+                 C 142 70, 118 70, 100 70 Z"
+              fill="url(#kadoPita)"/>
+        <circle cx="100" cy="70" r="8" fill="#d9a54a"/>
+        <circle cx="100" cy="70" r="8" fill="none"
+                stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+      </svg>
+    </button>
+
+    <p class="pembuka-bawah">Ketuk kadonya untuk membuka</p>
+
+    <!-- Cadangan bila JavaScript mati: tautan ini membuka halaman tanpa animasi -->
+    <noscript>
+      <a class="pembuka-lompat" href="?buka=1">Lanjut tanpa animasi</a>
+    </noscript>
+
+  </div>
+</div>
 
 <!-- ══ Lapisan latar ══════════════════════════════════════════════════════
      Semua lapisan ini posisinya tetap (fixed) dan tidak menangkap klik,
@@ -255,5 +334,10 @@
 <script src="js/petals.js"></script>
 <script src="js/calendar.js"></script>
 <script src="js/main.js"></script>
+
+<!-- Dimuat PALING AKHIR, sengaja.
+     Layar kado memutar musik di dalam penangan kliknya, dan itu harus terjadi
+     setelah halaman siap. Lihat penjelasan di dalam berkasnya. -->
+<script src="js/pembuka.js"></script>
 </body>
 </html>

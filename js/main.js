@@ -110,6 +110,31 @@
   function siapkanHero() {
     if (!pakaiGSAP) return;
 
+    /* Bila layar kado dipakai, animasi hero ditahan dulu. Kalau tidak, ia
+       sudah selesai berjalan di balik layar kado, dan pengguna tidak sempat
+       melihatnya. Animasi baru dijalankan setelah kadonya diklik. */
+    const layarKado = document.getElementById("pembuka");
+    if (layarKado && !layarKado.hasAttribute("hidden")) {
+      window.addEventListener("halaman-dibuka", () => jalankanHero(), { once: true });
+
+      /* Jaring pengaman: bila karena satu dan lain hal peristiwanya tidak
+         sampai, animasinya tetap dijalankan setelah 6 detik. */
+      window.setTimeout(() => {
+        if (!document.body.classList.contains("terkunci")) jalankanHero();
+      }, 6000);
+      return;
+    }
+
+    jalankanHero();
+  }
+
+  /* Animasi masuknya hero. Dipisah supaya bisa dipanggil kapan saja, baik
+     langsung saat halaman siap maupun setelah kado diklik. */
+  let heroSudahJalan = false;
+  function jalankanHero() {
+    if (!pakaiGSAP || heroSudahJalan) return;
+    heroSudahJalan = true;
+
     const tl = gsap.timeline({ defaults: { ease: "power3.out", duration: 0.9 } });
 
     tl.fromTo("#hero-bunga-atas",
@@ -636,10 +661,23 @@
 
     btn.addEventListener("click", () => musik.toggle());
 
+    /* Dibagikan ke window supaya js/pembuka.js bisa menyalakan suaranya
+       tepat saat kado diklik, dan supaya tombol di kanan atas ikut
+       menampilkan keadaan yang benar. */
+    window.__musik = musik;
+
     /* Jalankan lagunya saat halaman dibuka.
        Bila browser memblokir suara otomatis, lagunya tetap berjalan dalam
-       keadaan bisu dan suaranya menyala pada sentuhan pertama. */
-    if (D.musik.auto) musik.mulai();
+       keadaan bisu dan suaranya menyala pada sentuhan pertama.
+
+       Bila layar kado dipakai, pemutaran di sini DILEWATI. Alasannya dua:
+         1. play() di dalam penangan klik kado jauh lebih pasti diizinkan
+            browser, jadi tidak perlu mengandalkan cara bisu.
+         2. Lagunya mulai dari detik 0 tepat saat halaman terlihat, bukan
+            sudah berjalan di balik layar kado.
+       Pemutarannya dilakukan js/pembuka.js. */
+    const adaKado = document.getElementById("pembuka");
+    if (D.musik.auto && !adaKado) musik.mulai();
   }
 
   /* ── 7. Tombol "Lihat Kejutan!" ─────────────────────────────────────────────── */

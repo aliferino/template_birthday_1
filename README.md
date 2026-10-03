@@ -29,6 +29,7 @@ Sudah tayang di: **https://template-birthday-1.vercel.app**
   - [7. Mengubah Isi Toples Harapan](#7-mengubah-isi-toples-harapan)
   - [8. Mengubah Lagu](#8-mengubah-lagu)
   - [9. Mengubah Warna Tema](#9-mengubah-warna-tema)
+  - [10. Mengatur Layar Kado](#10-mengatur-layar-kado)
 - [Upload ke GitHub Pages](#upload-ke-github-pages)
 - [Tips dan Catatan](#tips-dan-catatan)
 
@@ -45,7 +46,8 @@ Sudah tayang di: **https://template-birthday-1.vercel.app**
 | Ledakan bunga | Bunga asli beterbangan saat tombol ditekan |
 | Timeline vertikal | Bagian ucapan berbentuk garis waktu bernomor |
 | Toples Harapan | Tombol dikocok, tutup toples terbuka, kertas terbang ke kartu, satu harapan keluar acak |
-| Musik | Lagu menyala sendiri saat halaman dibuka, bisa dibisukan lewat tombol di kanan atas |
+| Layar kado | Kado harus diklik dulu sebelum halaman terbuka, supaya musik bisa berbunyi sendiri |
+| Musik | Lagu menyala sendiri setelah kado diklik, bisa dibisukan lewat tombol di kanan atas |
 | Responsif | Sudah diuji di 360px, 390px, 768px, dan 1024px |
 | Ringan | Total di bawah 1 MB, tanpa dependensi eksternal |
 
@@ -65,7 +67,8 @@ Sudah tayang di: **https://template-birthday-1.vercel.app**
 │   ├── main.js             # Animasi dan interaksi
 │   ├── calendar.js         # Pembuat kalender otomatis
 │   ├── petals.js           # Kelopak bunga berjatuhan
-│   └── music.js            # Lagu Happy Birthday
+│   ├── music.js            # Pemutar lagu
+│   └── pembuka.js          # Layar kado dan pemutaran lagunya
 └── assets/
     ├── lagu.mp3            # ⭐ LAGU YANG DIPUTAR
     ├── kartu-foto.webp     # ⭐ FOTO DI DALAM KARTU (1:1)
@@ -486,6 +489,69 @@ Ubah kode warnanya (format heksadesimal). Contoh tema biru:
 
 > Karena semua warna memakai variabel ini, mengubah beberapa baris saja sudah
 > cukup untuk mengganti seluruh tema halaman.
+
+---
+
+### 10. Mengatur Layar Kado
+
+Sebelum halaman terbuka, ada layar berisi kado yang harus diklik.
+
+**Kenapa ada?** Semua browser melarang suara berbunyi otomatis sebelum
+pengguna menyentuh halaman. Klik pada kado itu adalah sentuhan tersebut,
+sehingga musiknya bisa berbunyi sejak detik pertama halaman muncul. Tanpa
+layar ini, musik hampir pasti diblokir di Chrome dan peramban bawaan HP.
+
+**Mengubah tulisan di layar kado**
+
+Buka `index.html`, cari bagian `<!-- ══ PEMBUKA`. Ubah dua baris ini:
+
+```html
+<p class="pembuka-atas">Ada hadiah untukmu</p>
+...
+<p class="pembuka-bawah">Ketuk kadonya untuk membuka</p>
+```
+
+**Mengubah warna kado**
+
+Kado dibuat dari kode SVG, bukan gambar. Warnanya ada di `index.html`,
+di bagian `<defs>`:
+
+```html
+<linearGradient id="kadoBadan">   <!-- badan kotak -->
+  <stop offset="0%" stop-color="#f7bcd0"/>
+<linearGradient id="kadoTutup">   <!-- tutup kotak -->
+<linearGradient id="kadoPita">    <!-- pita emas -->
+```
+
+**Mengubah ukuran kado**
+
+Di `css/style.css`, cari `.kado`:
+
+```css
+width: clamp(160px, 42vw, 220px);   /* 160px di HP, sampai 220px di desktop */
+```
+
+**Melewati layar kado lewat tautan**
+
+Tambahkan `?buka=1` di alamat halaman:
+
+```
+https://alamat-situsmu.vercel.app/?buka=1
+```
+
+Berguna untuk membagikan tautan yang langsung terbuka tanpa klik kado.
+Catatan: dengan cara ini musiknya kemungkinan tidak berbunyi, karena tidak
+ada sentuhan pengguna.
+
+**Mematikan layar kado sepenuhnya**
+
+Hapus bagian `<div class="pembuka" id="pembuka">` sampai `</div>` penutupnya
+di `index.html`, dan hapus baris `<script src="js/pembuka.js"></script>` di
+bawahnya. Halaman akan langsung terbuka seperti semula.
+
+**Kado selalu muncul di setiap muat ulang.** Ini disengaja: kalau kado hanya
+muncul sekali, maka saat halaman dimuat ulang tidak ada sentuhan, dan musiknya
+diblokir lagi.
 
 ---
 

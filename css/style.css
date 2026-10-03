@@ -1531,9 +1531,145 @@ main {
   .gulir-petunjuk { display: none; }
 }
 
+/* ══ Layar pembuka: kado ══════════════════════════════════════════════════
+   Menutupi seluruh layar dan berada di atas segalanya. Halaman di belakangnya
+   dikunci supaya tidak bisa digulir sebelum kadonya diklik. */
+.pembuka {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+
+  /* Latar sama seperti halaman, supaya peralihannya tidak terasa melompat */
+  background:
+    radial-gradient(700px 460px at 50% 30%, rgba(255,255,255,0.9), transparent 72%),
+    linear-gradient(180deg, var(--pink-50) 0%, var(--pink-100) 40%, var(--pink-200) 100%);
+
+  /* Muncul dengan lembut saat halaman dibuka */
+  opacity: 1;
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+/* Keadaan saat kado diklik: memudar sambil sedikit membesar */
+.pembuka.pergi {
+  opacity: 0;
+  transform: scale(1.08);
+  pointer-events: none;
+}
+
+.pembuka[hidden] { display: none !important; }
+
+.pembuka-isi {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  max-width: 420px;
+}
+
+.pembuka-atas {
+  margin: 0 0 6px;
+  font-family: var(--font-judul);
+  font-size: clamp(30px, 8vw, 46px);
+  line-height: 1.15;
+  color: var(--pink-600);
+}
+
+/* ── Kado ─────────────────────────────────────────────────────────────── */
+.kado {
+  width: clamp(160px, 42vw, 220px);
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  /* Denyut pelan supaya terlihat bisa ditekan */
+  animation: kadoDenyut 2.1s ease-in-out infinite;
+  transition: transform 0.25s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.kado-gambar {
+  width: 100%;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 16px 30px rgba(168, 60, 98, 0.22));
+}
+
+/* Saat kursor di atasnya (komputer) */
+@media (hover: hover) {
+  .kado:hover { animation-play-state: paused; transform: translateY(-6px) scale(1.04); }
+}
+
+/* Saat ditekan */
+.kado:active { transform: scale(0.95); }
+
+.kado:focus-visible {
+  outline: 3px solid var(--pink-500);
+  outline-offset: 10px;
+  border-radius: 16px;
+}
+
+/* Denyut naik-turun yang halus */
+@keyframes kadoDenyut {
+  0%, 100% { transform: translateY(0) rotate(-1.5deg); }
+  50%      { transform: translateY(-10px) rotate(1.5deg); }
+}
+
+/* Tutup kadonya ikut bergerak sedikit, seolah mau terbuka */
+.kado-gambar rect:nth-of-type(3),
+.kado-gambar rect:nth-of-type(4) {
+  transform-origin: 100px 70px;
+  animation: tutupGoyang 2.1s ease-in-out infinite;
+}
+
+@keyframes tutupGoyang {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(-1.2deg); }
+}
+
+.pembuka-bawah {
+  margin: 10px 0 0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--tinta-soft);
+}
+
+/* Tautan cadangan (hanya tampil bila JavaScript mati) */
+.pembuka-lompat {
+  display: inline-block;
+  margin-top: 18px;
+  padding: 11px 22px;
+  border-radius: 999px;
+  background: var(--pink-500);
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* ── Kunci gulir selama layar kado masih ada ───────────────────────────── */
+body.terkunci {
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* Kurangi gerakan bila pengguna memintanya */
+@media (prefers-reduced-motion: reduce) {
+  .kado { animation: none; }
+  .kado-gambar rect:nth-of-type(3),
+  .kado-gambar rect:nth-of-type(4) { animation: none; }
+  .pembuka { transition: opacity 0.3s ease; }
+}
+
 /* ══ Cetak ═════════════════════════════════════════════════════════════════ */
 @media print {
-  .latar, .confetti, .tombol-musik, .bunga-pinggir, .gulir-petunjuk { display: none; }
+  .latar, .confetti, .tombol-musik, .bunga-pinggir, .gulir-petunjuk,
+  .pembuka { display: none; }
   body { background: #fff; }
   /* Saat dicetak: amplop disembunyikan, kartunya yang tampil. */
   .amplop { display: none !important; }
