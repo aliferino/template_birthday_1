@@ -8,6 +8,12 @@ tanpa perlu install apa pun. Cukup buka filenya di browser.
 
 ---
 
+## Demo
+
+Sudah tayang di: **https://template-birthday-1.vercel.app**
+
+---
+
 ## Daftar Isi
 
 - [Fitur](#fitur)
@@ -565,6 +571,47 @@ Ini normal bila di komputer pengguna mengaktifkan pengaturan "kurangi gerakan"
 Jalankan server lokal, cari alamat IP komputermu (misalnya `192.168.1.5`), lalu
 buka `http://192.168.1.5:8000` di HP. Pastikan HP dan komputer tersambung ke
 WiFi yang sama.
+
+---
+
+## Cara Menayangkan (Deploy)
+
+Halaman ini berupa berkas statis, jadi bisa ditaruh di layanan apa pun yang
+mendukung berkas statis. Pilih salah satu:
+
+### Vercel (yang dipakai sekarang)
+
+1. Pasang alatnya sekali saja:
+   ```bash
+   npm install -g vercel
+   ```
+2. Masuk ke akun Vercel:
+   ```bash
+   vercel login
+   ```
+3. Dari folder proyek, jalankan:
+   ```bash
+   vercel deploy --prod
+   ```
+4. Alamatnya langsung jadi, misalnya `https://template-birthday-1.vercel.app`
+
+### GitHub Pages (gratis, tanpa alat tambahan)
+
+1. Unggah proyek ini ke GitHub
+2. Buka **Settings** lalu **Pages**
+3. Pada bagian **Source**, pilih branch `main` dan folder `/ (root)`
+4. Simpan. Alamatnya jadi `https://<nama-akun>.github.io/<nama-repo>/`
+
+### Netlify (cara paling mudah tanpa kode)
+
+1. Buka [app.netlify.com/drop](https://app.netlify.com/drop)
+2. Tarik seluruh folder proyek ini ke halaman itu
+3. Selesai, alamatnya langsung jadi
+
+> **Penting untuk semua layanan:** berkas `data/harapan.json` dibaca memakai
+> `fetch`. Karena itu halaman harus dibuka lewat alamat `http` atau `https`,
+> bukan dengan mengeklik dua kali berkas `index.html`. Semua layanan di atas
+> sudah otomatis begitu.
 
 ---
 
